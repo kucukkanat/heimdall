@@ -18,9 +18,9 @@ graph TD;
     subgraph "Sign"
     FileContent --> Uint8Array
     TextContent:string --> Uint8Array
-    Uint8Array --> TextContentHash:Uint8Array
+    Uint8Array --> ContentHash:Uint8Array
     privateKey:Uint8Array --> Signature:Uint8Array
-    TextContentHash:Uint8Array --> Signature:Uint8Array
+    ContentHash:Uint8Array --> Signature:Uint8Array
     Signature:Uint8Array --> SignatureText:Base64String
     end
 ```
