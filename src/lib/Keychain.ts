@@ -23,8 +23,12 @@ export class Keychain {
     const signature = sign.detached(content, this.secretKey);
     return Uint8ArrayToBase64(signature);
   }
-  verify(content: Uint8Array, signature: Base64String): boolean {
+  static verify(
+    content: Uint8Array,
+    signature: Base64String,
+    publicKey: Uint8Array
+  ): boolean {
     const signatureUint8 = Base64ToUint8Array(signature);
-    return sign.detached.verify(signatureUint8, content, this.publicKey);
+    return sign.detached.verify(signatureUint8, content, publicKey);
   }
 }
