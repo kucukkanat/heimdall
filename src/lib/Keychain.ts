@@ -27,6 +27,7 @@ export class Keychain {
     }
     const entropy = mnemonicToEntropy(this.mnemonic);
 
+    console.log("HERE");
     const keyPair = box.keyPair.fromSecretKey(entropy);
     this.publicKey = keyPair.publicKey;
     this.secretKey = keyPair.secretKey;
