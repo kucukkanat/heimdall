@@ -1,61 +1,50 @@
-import { secretbox, box, randomBytes } from "tweetnacl";
-import { encodeUTF8, encodeBase64, decodeBase64 } from "tweetnacl-util";
+import { sign } from "tweetnacl";
+import { mnemonicToEntropy, generateMnemonic } from "./BIP39";
+import {
+  decodeUTF8,
+  encodeBase64 as Uint8ArrayToBase64,
+  decodeBase64 as Base64ToUint8Array,
+} from "tweetnacl-util";
 
 type Base64String = string;
-
-const newNonce = () => randomBytes(nonceLength);
-const { nonceLength, keyLength } = secretbox;
-class Wallet {
-  publicKey: Uint8Array;
+export class Wallet {
   secretKey: Uint8Array;
-  constructor() {
-    const keypair = box.keyPair();
-    const { publicKey, secretKey } = keypair;
-    this.publicKey = publicKey;
+  publicKey: Uint8Array;
+  publicKeyAsString: string;
+  secretKeyAsString: string;
+  mnemonic: string;
+  constructor(mnemonic?: string | undefined) {
+    this.mnemonic = mnemonic;
+  }
+  async init() {
+    if (!this.mnemonic) {
+      this.mnemonic = await generateMnemonic();
+    }
+
+    const seed = mnemonicToEntropy(this.mnemonic);
+    const { secretKey, publicKey } = sign.keyPair.fromSeed(seed);
     this.secretKey = secretKey;
+    this.publicKey = publicKey;
+    this.publicKeyAsString = Uint8ArrayToBase64(this.publicKey);
+    this.secretKeyAsString = Uint8ArrayToBase64(this.secretKey);
   }
-  export() {
-    return {
-      publicKey: encodeBase64(this.publicKey),
-      secretKey: encodeBase64(this.secretKey),
-    };
-  }
-  encrypt(message: string, publicKey: Base64String) {
-    const nonce = newNonce();
-    const publicKeyUint8 = decodeBase64(publicKey);
-    // Any string to uint8array
-    // const messageUint8 = decodeUTF8(message);
-    const messageUint8 = new TextEncoder().encode(message);
-    const encrypted = box(messageUint8, nonce, publicKeyUint8, this.secretKey);
-
-    // Full message is a Uint8Array of NONCE + MYPUBLIC + ENCRYPTED_MSG
-    const fullMessage = new Uint8Array([
-      ...nonce,
-      ...this.publicKey,
-      ...encrypted,
+  sign(message: string): Base64String {
+    const signature = sign.detached(decodeUTF8(message), this.secretKey);
+    const signatureWithMyPublicKey = new Uint8Array([
+      ...Array.from(this.publicKey),
+      ...Array.from(signature),
     ]);
-
-    return encodeBase64(fullMessage);
+    return Uint8ArrayToBase64(signatureWithMyPublicKey);
   }
-  decrypt(message: Base64String) {
-    const encryptedFullMessageUint8 = decodeBase64(message);
-    // Extract nonce
-    const nonce = encryptedFullMessageUint8.slice(0, nonceLength);
-    // Extract Encryptors Public Key
-    const theirPublicKey = encryptedFullMessageUint8.slice(
-      nonceLength,
-      nonceLength + keyLength
+  verify(message: string, signature: Base64String) {
+    const signatureArray = Array.from(Base64ToUint8Array(signature));
+    const signerPublicKey = signatureArray.slice(0, this.publicKey.length);
+    const detachedSignature = signatureArray.slice(this.publicKey.length);
+    const verification = sign.detached.verify(
+      decodeUTF8(message),
+      new Uint8Array(detachedSignature),
+      new Uint8Array(signerPublicKey)
     );
-    // Extract encrypted message
-    const encryptedMessage = encryptedFullMessageUint8.slice(
-      nonceLength + keyLength
-    );
-    const decryptedFullMessage = box.open(
-      encryptedMessage,
-      nonce,
-      theirPublicKey,
-      this.secretKey
-    );
-    return encodeUTF8(decryptedFullMessage);
+    return verification;
   }
 }

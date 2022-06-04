@@ -7,17 +7,15 @@ import {
 // @ts-ignore
 // import qrcode from "qrcode-terminal";
 describe("Heimdall", () => {
-  test("test test", () => {
-    const keychain = new Keychain();
-    const publicKey = keychain.exportPublic();
-    const privateKey = keychain.exportSecret();
-    // qrcode.generate(privateKey, console.log);
-    console.log({ publicKey, privateKey });
+  test("test test", async () => {
+    const keychain1 = new Keychain();
+    await keychain1.init();
+    const keychain2 = new Keychain();
+    await keychain2.init();
     const message = "Hello world";
-    const messageUint8Array = decodeUTF8(message);
-    const signature = keychain.sign(messageUint8Array);
-    console.log({ signature });
 
-    const verification = 
+    const encrypted = keychain1.encrypt(message, keychain2.exportPublic());
+    const decrypted = keychain2.decrypt(encrypted);
+    console.log({ encrypted, decrypted });
   });
 });
