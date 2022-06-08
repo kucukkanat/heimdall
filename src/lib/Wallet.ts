@@ -1,4 +1,4 @@
-import { sign } from "tweetnacl";
+import { sign, secretbox } from "tweetnacl";
 import { mnemonicToEntropy, generateMnemonic } from "./BIP39";
 import {
   decodeUTF8,
@@ -6,6 +6,9 @@ import {
   decodeBase64 as Base64ToUint8Array,
 } from "tweetnacl-util";
 
+/**
+ * Wallet Class creates a toolbox for managing keys and signing/verifying data.
+ */
 type Base64String = string;
 export class Wallet {
   secretKey: Uint8Array;
@@ -36,10 +39,10 @@ export class Wallet {
     ]);
     return Uint8ArrayToBase64(signatureWithMyPublicKey);
   }
-  verify(message: string, signature: Base64String) {
+  static verify(message: string, signature: Base64String) {
     const signatureArray = Array.from(Base64ToUint8Array(signature));
-    const signerPublicKey = signatureArray.slice(0, this.publicKey.length);
-    const detachedSignature = signatureArray.slice(this.publicKey.length);
+    const signerPublicKey = signatureArray.slice(0, sign.publicKeyLength);
+    const detachedSignature = signatureArray.slice(sign.publicKeyLength);
     const verification = sign.detached.verify(
       decodeUTF8(message),
       new Uint8Array(detachedSignature),

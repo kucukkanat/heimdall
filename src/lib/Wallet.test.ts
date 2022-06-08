@@ -6,7 +6,7 @@ describe("wallet tests", () => {
     await wallet.init();
     const message = "Hello world";
     const signature = wallet.sign(message);
-    const verification = wallet.verify(message, signature);
+    const verification = Wallet.verify(message, signature);
     expect(verification).toBe(true);
   });
 

@@ -12,6 +12,10 @@ import {
 } from "./BIP39";
 type Base64String = string;
 const newNonce = () => randomBytes(box.nonceLength);
+
+/**
+ * Keychain Class creates a toolbox for managing keys and encrypting/decrypting data.
+ */
 export class Keychain {
   secretKey: Uint8Array;
   publicKey: Uint8Array;
@@ -26,7 +30,6 @@ export class Keychain {
       this.mnemonic = await generateMnemonic();
     }
     const entropy = mnemonicToEntropy(this.mnemonic);
-
     const keyPair = box.keyPair.fromSecretKey(entropy);
     this.publicKey = keyPair.publicKey;
     this.secretKey = keyPair.secretKey;
@@ -61,10 +64,10 @@ export class Keychain {
     const nonce = contentWithHeadArray.slice(0, box.nonceLength);
     const publicKey = contentWithHeadArray.slice(
       box.nonceLength,
-      box.nonceLength + this.publicKey.length
+      box.nonceLength + box.publicKeyLength
     );
     const encryptedMessage = contentWithHeadArray.slice(
-      box.nonceLength + this.publicKey.length
+      box.nonceLength + box.publicKeyLength
     );
     const decryptedMessage = box.open(
       new Uint8Array(encryptedMessage),

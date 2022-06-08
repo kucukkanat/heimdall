@@ -16,6 +16,6 @@ describe("Heimdall", () => {
 
     const encrypted = keychain1.encrypt(message, keychain2.exportPublic());
     const decrypted = keychain2.decrypt(encrypted);
-    console.log({ encrypted, decrypted });
+    expect(decrypted).toEqual(message);
   });
 });

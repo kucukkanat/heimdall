@@ -1,5 +1,7 @@
 import { wordlist } from "./wordlist";
 const ENTROPY_STRENGTH_ERROR = "Wrong entropy strength";
+const ENTROPY_STRENGTH_TOO_SMALL_ERROR =
+  "Entropy strength must be bigger than 32 bits";
 // if (typeof window !== "undefined") {
 //   const crypto = window.crypto;
 // } else {
@@ -10,7 +12,8 @@ const crypto = require("crypto");
 //bits
 const SHA256 = async (data: Uint8Array) => {
   const digested = await crypto.subtle.digest("SHA-256", data);
-  return digested;
+  // 256 bit ArrayBuffer = 32 byte Uint8Array
+  return new Uint8Array(digested);
 };
 /**
  * Creates an entropy of Strength/8 bytes
@@ -23,7 +26,11 @@ const SHA256 = async (data: Uint8Array) => {
  */
 export const createEntropy = (strength: number = 256) => {
   if (strength % 8 !== 0) {
+    console.log({ strength });
     throw new Error(ENTROPY_STRENGTH_ERROR);
+  }
+  if (strength < 32) {
+    throw new Error(ENTROPY_STRENGTH_TOO_SMALL_ERROR);
   }
   return crypto.getRandomValues(new Uint8Array(strength / 8));
 };
@@ -33,13 +40,13 @@ const Array2BitString = (arr: Uint8Array | Array<number>) =>
   Array.from(arr).map(byte2bin).join("");
 
 export async function calculateChecksum(entropy: Uint8Array) {
-  const digested = await SHA256(entropy);
-  const strength = entropy.length * 8;
-  const hashResult = Array.from(new Uint8Array(digested));
+  const hashResult = await SHA256(entropy);
+  const strengthAsBits = entropy.length * 8;
+
   const hashResultAsBitString = Array2BitString(hashResult);
   // Take first ENTROPY_LENGTH/32 bits of entropy's hash
   // Add 1 bit of checksum per each 32 bit
-  return hashResultAsBitString.slice(0, strength / 32);
+  return hashResultAsBitString.slice(0, strengthAsBits / 32);
 }
 
 export async function entropyToMnemonic(entropy: Uint8Array): Promise<string> {
