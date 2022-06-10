@@ -1,5 +1,6 @@
 import { Wallet } from "./Wallet";
 
+
 describe("wallet tests", () => {
   test("Create wallet", async function () {
     const wallet = new Wallet();
@@ -17,4 +18,12 @@ describe("wallet tests", () => {
     await wallet2.init();
     expect(wallet.publicKeyAsString === wallet2.publicKeyAsString).toBe(true);
   });
+  test("Sign and verify with the wallet", async function(){
+    const wallet = new Wallet()
+    const {publicKeyAsString} = wallet
+    const message="My message"
+    // Signatue will already include the detached signature and the public key of the signer
+    const signature = wallet.sign(message)
+    const verification = Wallet.verify(message,signature)
+  })
 });
