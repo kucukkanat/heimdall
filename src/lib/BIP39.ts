@@ -2,12 +2,6 @@ import { wordlist } from "./wordlist";
 const ENTROPY_STRENGTH_ERROR = "Wrong entropy strength";
 const ENTROPY_STRENGTH_TOO_SMALL_ERROR =
   "Entropy strength must be bigger than 32 bits";
-// if (typeof window !== "undefined") {
-//   const crypto = window.crypto;
-// } else {
-//   const crypto = require("crypto");
-// }
-const crypto = require("crypto");
 
 //bits
 const SHA256 = async (data: Uint8Array) => {
@@ -17,9 +11,7 @@ const SHA256 = async (data: Uint8Array) => {
 };
 /**
  * Creates an entropy of Strength/8 bytes
- *
  * 256 for 32 bytes
- *
  * 128 for 16 bytes
  * @param {number} strength - Strength as bits
  * @returns {Uint8Array} - Entropy length will be strength/8

@@ -32,6 +32,7 @@ export class Wallet {
     this.secretKeyAsString = Uint8ArrayToBase64(this.secretKey);
   }
   sign(message: string): Base64String {
+
     const signature = sign.detached(decodeUTF8(message), this.secretKey);
     const signatureWithMyPublicKey = new Uint8Array([
       ...Array.from(this.publicKey),

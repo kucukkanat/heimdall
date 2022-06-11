@@ -15,7 +15,7 @@
     "dev": "parcel src/index.html",
     "build": "parcel build src/index.html",
     "test:debug": "node --inspect-brk  node_modules/.bin/jest --runInBand",
-    "test": "jest"
+    "test": "parcel src/test.html"
   },
   "devDependencies": {
     "@types/jest": "^27.5.1",

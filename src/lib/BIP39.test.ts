@@ -1,3 +1,4 @@
+import { describe, test, expect } from "./testing-library";
 import { generateMnemonic } from "./BIP39";
 
 describe("BIP39 Tests", () => {
@@ -5,6 +6,7 @@ describe("BIP39 Tests", () => {
     const mnemonic = await generateMnemonic();
     const mnemonic2 = await generateMnemonic();
     expect(mnemonic !== mnemonic2).toBeTruthy();
+    throw new Error("AYE")
   });
 
   test("Creates a mnemonic with 3 words per 32 bit", async () => {
